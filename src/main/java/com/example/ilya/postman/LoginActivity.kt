@@ -1,19 +1,17 @@
 package com.example.ilya.postman
 
+import android.app.Activity
 import android.content.*
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.IBinder
 import android.support.design.widget.TextInputLayout
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.*
-import com.example.ilya.postman.net.ClientService
+import com.example.ilya.postman.data.User
 import org.json.JSONObject
 
-class LoginActivity : AppCompatActivity(), View.OnClickListener, TextView.OnEditorActionListener{
+class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView.OnEditorActionListener{
     private lateinit var goButton: Button
     private lateinit var toggleButton: Button
     private lateinit var progressBar: ProgressBar
@@ -26,16 +24,17 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, TextView.OnEdit
     private lateinit var passwordTextView: EditText
     private lateinit var password2TextView: EditText
 
-    private lateinit var clientServiceIntent:Intent
-    private var clientService: ClientService? = null
-    private lateinit var clientServiceConnection: ServiceConnection
     private lateinit var logInReceiver: LogInReceiver
+
+    private var email: String? = null
+    private var pass: String? = null
 
     private var register = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
         goButton = findViewById(R.id.go_button)
         toggleButton = findViewById(R.id.toggle_button)
         progressBar = findViewById(R.id.login_progress)
@@ -54,25 +53,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, TextView.OnEdit
         password2TextView.setOnEditorActionListener(this)
 
         logInReceiver = LogInReceiver()
-        registerReceiver(logInReceiver, IntentFilter(receiverAction))
-
-        clientServiceIntent = Intent(this, ClientService::class.java)
-        clientServiceConnection = object : ServiceConnection {
-            override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-                clientService = (p1 as ClientService.CustomBinder).getService()
-            }
-
-            override fun onServiceDisconnected(p0: ComponentName?) {
-                clientService = null
-            }
-        }
-
-        if (!ClientService.isRun) startService(clientServiceIntent)
-    }
-
-    override fun onStart() {
-        super.onStart()
-        bindService(clientServiceIntent, clientServiceConnection, Context.BIND_AUTO_CREATE)
+        registerReceiver(logInReceiver, IntentFilter(RECEIVER_ACTION))
     }
 
     override fun onClick(p0: View?) {
@@ -85,16 +66,11 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, TextView.OnEdit
                 progressBar.progress++
 
                 if (validate()) {
-                    val request = JSONObject()
-                            .put("email", emailTextView.text)
-                            .put("pass", passwordTextView.text)
+                    email = emailTextView.text.toString()
+                    pass = passwordTextView.text.toString()
 
-                    if (register){
-                        request.put("id", 2)
-                        request.put("name", nameTextView.text)
-                    }else request.put("id", 0)
-
-                    clientService!!.sendMessage(request.toString())
+                    if (register) register(nameTextView.text.toString(), email!!, pass!!)
+                    else authorize(email!!, pass!!)
                 } else hideProgressBar()
             }
 
@@ -144,8 +120,30 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, TextView.OnEdit
 
     override fun onDestroy() {
         super.onDestroy()
-        unbindService(clientServiceConnection)
         unregisterReceiver(logInReceiver)
+    }
+
+    override fun onClientServiceConnected() {
+
+    }
+
+    private fun authorize(email: String, pass: String) {
+        clientService!!.sendMessage(
+                JSONObject()
+                        .put("id", 0)
+                        .put("email", email)
+                        .put("pass", pass).toString()
+        )
+    }
+
+    private fun register(name: String, email: String, pass: String) {
+        clientService!!.sendMessage(
+                JSONObject()
+                        .put("id", 2)
+                        .put("name", name)
+                        .put("email", email)
+                        .put("pass", pass).toString()
+        )
     }
 
     private fun showProgressBar(){
@@ -207,6 +205,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, TextView.OnEdit
 
     private inner class LogInReceiver: BroadcastReceiver(){
         override fun onReceive(p0: Context?, p1: Intent?) {
+            val context = applicationContext
             progressBar.progress += 4
 
             when (p1!!.getIntExtra("messageId", -1)){
@@ -214,14 +213,23 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, TextView.OnEdit
                     val emailIsValid = p1.getBooleanExtra("emailIsValid", false)
                     val passIsValid = p1.getBooleanExtra("passIsValid", false)
 
-                    Log.d(getString(R.string.net_log_tag), "$emailIsValid $passIsValid")
+                    if (!emailIsValid) emailLayout.error = getString(R.string.error_user_not_exists)
+                    else if (!passIsValid) passwordLayout.error = getString(R.string.error_incorrect_password)
+                    else {
+                        User.setId(context, p1.getIntExtra("userId", -1))
+                        User.setName(context, p1.getStringExtra("name"))
+                        User.setEmail(context, email!!)
+                        User.setPass(context, pass!!)
+
+                        setResult(Activity.RESULT_OK, Intent())
+                        finish()
+                    }
                 }
 
                 1 -> {
                     val success = p1.getBooleanExtra("success", false)
-                    val userId = p1.getIntExtra("userId", -1)
-
-                    Log.d(getString(R.string.net_log_tag), "$success $userId")
+                    if (success) authorize(email!!, pass!!)
+                    else emailLayout.error = getString(R.string.error_user_exists)
                 }
             }
 
@@ -231,6 +239,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, TextView.OnEdit
     }
 
     companion object {
-        const val receiverAction = "com.example.ilya.postman.LoginReceiver"
+        const val RECEIVER_ACTION = "com.example.ilya.postman.LoginReceiver"
     }
 }

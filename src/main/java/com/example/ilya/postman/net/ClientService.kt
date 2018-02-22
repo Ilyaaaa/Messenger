@@ -1,15 +1,15 @@
 package com.example.ilya.postman.net
 
 import android.app.Service
-import android.content.ComponentName
 import android.content.Intent
-import android.content.ServiceConnection
 import android.os.AsyncTask
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
 import com.example.ilya.postman.LoginActivity
+import com.example.ilya.postman.MainActivity
 import com.example.ilya.postman.R
+import com.example.ilya.postman.data.User
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -68,7 +68,7 @@ class ClientService: Service(){
                 isRun = true
                 ReceptionTread().start()
                 SendThread().start()
-            }catch (ex: ConnectException){
+            }catch (ex: Exception){
                 restart()
             }
         }
@@ -93,24 +93,38 @@ class ClientService: Service(){
 
                     when (jsonObject["id"]){
                         0 -> {
-                            val intent = Intent(LoginActivity.receiverAction)
-                                    .putExtra("messageId", 0)
-                                    .putExtra("emailIsValid", jsonObject["emailIsValid"] as Boolean)
-                                    .putExtra("passIsValid", jsonObject["passIsValid"] as Boolean)
-                            sendBroadcast(intent)
+                            sendBroadcast(
+                                    Intent(LoginActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 0)
+                                            .putExtra("emailIsValid", jsonObject["emailIsValid"] as Boolean)
+                                            .putExtra("passIsValid", jsonObject["passIsValid"] as Boolean)
+                                            .putExtra("name", jsonObject["name"] as String)
+                                            .putExtra("userId", jsonObject["userId"] as Int)
+                            )
                         }
 
                         1 -> {
-                            val intent = Intent(LoginActivity.receiverAction)
-                                    .putExtra("messageId", 1)
-                                    .putExtra("success", jsonObject["success"] as Boolean)
-                                    .putExtra("userId", jsonObject["userId"] as Int)
-                            sendBroadcast(intent)
+                            sendBroadcast(
+                                    Intent(LoginActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 1)
+                                            .putExtra("success", jsonObject["success"] as Boolean)
+                            )
+                        }
+
+                        2 -> {
+                            var success = false
+                            if (jsonObject["emailIsValid"] as Boolean && jsonObject["passIsValid"] as Boolean)
+                                success = true
+
+                            sendBroadcast(
+                                    Intent(MainActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 0)
+                                            .putExtra("success", success)
+                            )
                         }
                     }
 
                 }catch (ex: SocketException){
-                    ex.printStackTrace()
                     restart()
                 }
             }
@@ -134,7 +148,7 @@ class ClientService: Service(){
 
     companion object {
         var isRun = false
-        var address = "192.168.0.86"
+        var address = "192.168.43.80"
         var port = 4000
     }
 }

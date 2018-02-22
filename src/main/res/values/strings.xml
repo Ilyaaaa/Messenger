@@ -4,7 +4,9 @@
     <string name="net_log_tag">ServerConnector</string>
     <string name="main_log_tag">Messenger</string>
 
-    <!-- Strings related to login -->
+    <string name="drawer_open">open</string>
+    <string name="drawer_close">close</string>
+
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="repeat_password">Repeat password</string>
@@ -12,9 +14,15 @@
     <string name="go">Go</string>
     <string name="sign_in">Sign in</string>
     <string name="register">Register</string>
+
     <string name="error_invalid_email">Invalid email address</string>
     <string name="error_invalid_password">Password is too short</string>
     <string name="error_incorrect_password">Password is incorrect</string>
     <string name="error_field_required">Field is required</string>
     <string name="error_pass_not_match">Passwords is no match</string>
+    <string name="error_user_not_exists">Such user not exists</string>
+    <string name="error_user_exists">Such user already exists</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
