@@ -148,7 +148,7 @@ class ClientService: Service(){
 
     companion object {
         var isRun = false
-        var address = "192.168.43.80"
+        var address = "192.168.0.88"
         var port = 4000
     }
 }

@@ -7,18 +7,23 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.support.design.widget.NavigationView
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
 import com.example.ilya.postman.data.User
+import com.example.ilya.postman.fragments.MainFragment
 import org.json.JSONObject
 
 class MainActivity : CustomAppCompactActivity(), View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
     private lateinit var navigationDrawerLayout: DrawerLayout
     private lateinit var navigationDrawerToggle: ActionBarDrawerToggle
     private lateinit var toolbar: Toolbar
+
+    private val mainFragment = MainFragment()
 
     private lateinit var mainReceiver:MainReceiver
 
@@ -78,9 +83,11 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val fragmentTransaction = fragmentManager.beginTransaction()
-//        fragmentTransaction.replace(R.id.container_layout, fragment)
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
         when (item.itemId) {
+            R.id.test_item -> {
+                fragmentTransaction.replace(R.id.container_layout, mainFragment)
+            }
         }
 
         fragmentTransaction.commit()

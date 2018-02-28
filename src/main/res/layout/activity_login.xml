@@ -14,8 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:visibility="invisible"
-        android:max="10"
-        />
+        android:max="10" />
 
     <ScrollView
         android:id="@+id/login_scroll"

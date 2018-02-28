@@ -6,4 +6,8 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowTranslucentStatus">true</item>
     </style>
+
+    <style name="AppTheme.Classic" parent="AppTheme">
+        <item name="android:windowTranslucentStatus">false</item>
+    </style>
 </resources>
