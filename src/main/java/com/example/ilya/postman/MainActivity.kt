@@ -7,21 +7,27 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.support.design.widget.NavigationView
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentTransaction
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import com.example.ilya.postman.data.User
 import com.example.ilya.postman.fragments.MainFragment
+import com.makeramen.roundedimageview.RoundedImageView
 import org.json.JSONObject
 
 class MainActivity : CustomAppCompactActivity(), View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
     private lateinit var navigationDrawerLayout: DrawerLayout
     private lateinit var navigationDrawerToggle: ActionBarDrawerToggle
     private lateinit var toolbar: Toolbar
+    private lateinit var navView: NavigationView
+    private lateinit var navImageView: RoundedImageView
+    private lateinit var navNameField: TextView
+    private lateinit var navEmailField: TextView
+    private lateinit var navStatusField: TextView
 
     private val mainFragment = MainFragment()
 
@@ -34,13 +40,25 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
         toolbar = findViewById(R.id.main_toolbar)
         setSupportActionBar(toolbar)
 
+        navView = findViewById(R.id.nav_view)
+        val navHeader = navView.getHeaderView(0)
+        navImageView = navHeader.findViewById(R.id.nav_avatar)
+        navNameField = navHeader.findViewById(R.id.nav_name_field)
+        navEmailField = navHeader.findViewById(R.id.nav_email_field)
+        navStatusField = navHeader.findViewById(R.id.nav_status_field)
+
         navigationDrawerLayout = findViewById(R.id.main_drawer)
         navigationDrawerToggle = ActionBarDrawerToggle(this, navigationDrawerLayout, R.string.drawer_open, R.string.drawer_close)
         navigationDrawerLayout.addDrawerListener(navigationDrawerToggle)
         navigationDrawerToggle.syncState()
+        findViewById<NavigationView>(R.id.nav_view).setNavigationItemSelectedListener(this)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setHomeButtonEnabled(true)
+
+        supportFragmentManager.beginTransaction()
+                .add(R.id.container_layout, mainFragment)
+                .commit()
 
         mainReceiver = MainReceiver()
         registerReceiver(mainReceiver, IntentFilter(RECEIVER_ACTION))
@@ -84,9 +102,11 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
+
         when (item.itemId) {
             R.id.test_item -> {
-                fragmentTransaction.replace(R.id.container_layout, mainFragment)
+                navNameField.text = User.getName(applicationContext)
+                navEmailField.text = User.getEmail(applicationContext)
             }
         }
 

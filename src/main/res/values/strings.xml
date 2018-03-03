@@ -22,7 +22,4 @@
     <string name="error_pass_not_match">Passwords is no match</string>
     <string name="error_user_not_exists">Such user not exists</string>
     <string name="error_user_exists">Such user already exists</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
