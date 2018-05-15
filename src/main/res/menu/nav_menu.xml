@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/test_item" android:title="Test"/>
+    <group android:id="@+id/nav_menu_control_group"
+        android:checkableBehavior="single">
+        <item android:id="@+id/new_chat_item"
+            android:icon="@drawable/ic_create_black"
+            android:title="@string/create_chat"/>
+    </group>
+    <group android:id="@+id/nav_menu_navigation_group"
+        android:checkableBehavior="single">
+        <item android:id="@+id/chats_item"
+            android:icon="@drawable/ic_chat_black"
+            android:title="@string/chats"/>
+    </group>
 </menu>

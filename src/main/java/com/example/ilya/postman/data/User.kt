@@ -19,6 +19,18 @@ object User {
         else null
     }
 
+    fun setLogin(context: Context, login: String){
+        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("login", login)
+        editor.apply()
+    }
+
+    fun getLogin(context: Context): String?{
+        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return sharedPreferences.getString("login", null)
+    }
+
     fun setName(context: Context, name: String){
         val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
@@ -29,6 +41,18 @@ object User {
     fun getName(context: Context): String?{
         val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         return sharedPreferences.getString("name", null)
+    }
+
+    fun setName2(context: Context, name2: String){
+        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("name2", name2)
+        editor.apply()
+    }
+
+    fun getName2(context: Context): String?{
+        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return sharedPreferences.getString("name2", null)
     }
 
     fun setEmail(context: Context, email: String){

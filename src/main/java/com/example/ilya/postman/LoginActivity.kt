@@ -16,11 +16,15 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
     private lateinit var toggleButton: Button
     private lateinit var progressBar: ProgressBar
     private lateinit var emailLayout: TextInputLayout
+    private lateinit var loginLayout: TextInputLayout
     private lateinit var nameLayout: TextInputLayout
+    private lateinit var name2Layout: TextInputLayout
     private lateinit var passwordLayout: TextInputLayout
     private lateinit var password2Layout: TextInputLayout
     private lateinit var emailTextView: AutoCompleteTextView
+    private lateinit var loginTextView: EditText
     private lateinit var nameTextView: EditText
+    private lateinit var name2TextView: EditText
     private lateinit var passwordTextView: EditText
     private lateinit var password2TextView: EditText
 
@@ -39,13 +43,17 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
         toggleButton = findViewById(R.id.toggle_button)
         progressBar = findViewById(R.id.login_progress)
         emailLayout = findViewById(R.id.email_layout)
+        loginLayout = findViewById(R.id.login_layout)
         nameLayout = findViewById(R.id.name_layout)
+        name2Layout = findViewById(R.id.name2_layout)
         passwordLayout = findViewById(R.id.password_layout)
         password2Layout = findViewById(R.id.repeat_password_layout)
-        emailTextView = findViewById(R.id.email)
-        nameTextView = findViewById(R.id.name)
-        passwordTextView = findViewById(R.id.password)
-        password2TextView = findViewById(R.id.repeat_password)
+        emailTextView = findViewById(R.id.email_field)
+        loginTextView = findViewById(R.id.login_field)
+        nameTextView = findViewById(R.id.name_field)
+        name2TextView = findViewById(R.id.name2_field)
+        passwordTextView = findViewById(R.id.password_field)
+        password2TextView = findViewById(R.id.repeat_password_field)
 
         goButton.setOnClickListener(this)
         toggleButton.setOnClickListener(this)
@@ -69,22 +77,34 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
                     email = emailTextView.text.toString()
                     pass = passwordTextView.text.toString()
 
-                    if (register) register(nameTextView.text.toString(), email!!, pass!!)
+                    if (register)
+                        register(
+                                loginTextView.text.toString(),
+                                nameTextView.text.toString(),
+                                name2TextView.text.toString(),
+                                email!!,
+                                pass!!)
                     else authorize(email!!, pass!!)
                 } else hideProgressBar()
             }
 
             toggleButton.id -> {
                 if (!register){
+                    loginLayout.visibility = View.VISIBLE
                     nameLayout.visibility = View.VISIBLE
+                    name2Layout.visibility = View.VISIBLE
                     password2Layout.visibility = View.VISIBLE
                     toggleButton.setText(R.string.sign_in)
                     passwordTextView.imeOptions = EditorInfo.IME_ACTION_NEXT
 
                     register = true
                 }else{
+                    loginLayout.visibility = View.GONE
+                    loginTextView.text = null
                     nameLayout.visibility = View.GONE
                     nameTextView.text = null
+                    name2Layout.visibility = View.GONE
+                    name2TextView.text = null
                     password2Layout.visibility = View.GONE
                     password2TextView.text = null
                     toggleButton.setText(R.string.register)
@@ -94,7 +114,9 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
                 }
 
                 emailLayout.error = null
+                loginLayout.error = null
                 nameLayout.error = null
+                name2Layout.error = null
                 passwordLayout.error = null
                 password2Layout.error = null
                 emailTextView.requestFocus()
@@ -136,11 +158,13 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
         )
     }
 
-    private fun register(name: String, email: String, pass: String) {
+    private fun register(login: String, name: String, name2: String, email: String, pass: String) {
         clientService!!.sendMessage(
                 JSONObject()
                         .put("id", 2)
+                        .put("login", login)
                         .put("name", name)
+                        .put("name2", name2)
                         .put("email", email)
                         .put("pass", pass).toString()
         )
@@ -158,7 +182,9 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
 
     private fun validate(): Boolean{
         val email = emailTextView.text.toString()
+        val login = loginTextView.text.toString()
         val name = nameTextView.text.toString()
+        val name2 = name2TextView.text.toString()
         val pass = passwordTextView.text.toString()
         val pass2 = password2TextView.text.toString()
 
@@ -187,8 +213,18 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
         }
 
         if (register){
+            if (login.isEmpty()){
+                loginLayout.error = getString(R.string.error_field_required)
+                return false
+            }
+
             if (name.isEmpty()){
                 nameLayout.error = getString(R.string.error_field_required)
+                return false
+            }
+
+            if (name2.isEmpty()){
+                name2Layout.error = getString(R.string.error_field_required)
                 return false
             }
 
@@ -217,7 +253,9 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
                     else if (!passIsValid) passwordLayout.error = getString(R.string.error_incorrect_password)
                     else {
                         User.setId(context, p1.getIntExtra("userId", -1))
+                        User.setLogin(context, p1.getStringExtra("login"))
                         User.setName(context, p1.getStringExtra("name"))
+                        User.setName2(context, p1.getStringExtra("name2"))
                         User.setEmail(context, email!!)
                         User.setPass(context, pass!!)
 
@@ -227,9 +265,11 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
                 }
 
                 1 -> {
-                    val success = p1.getBooleanExtra("success", false)
-                    if (success) authorize(email!!, pass!!)
-                    else emailLayout.error = getString(R.string.error_user_exists)
+                    val emailIsValid = p1.getBooleanExtra("emailIsValid", false)
+                    val loginIsValid = p1.getBooleanExtra("loginIsValid", false)
+                    if (!emailIsValid) emailLayout.error = getString(R.string.error_user_exists)
+                    else if (!loginIsValid) loginLayout.error = getString(R.string.error_login_busy)
+                    else authorize(email!!, pass!!)
                 }
             }
 

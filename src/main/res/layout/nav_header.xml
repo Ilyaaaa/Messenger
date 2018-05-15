@@ -17,12 +17,12 @@
         app:riv_border_width="@dimen/avatar_border_width" />
 
     <TextView
-        android:id="@+id/nav_name_field"
+        android:id="@+id/nav_login_field"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
-        android:id="@+id/nav_email_field"
+        android:id="@+id/nav_name_field"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

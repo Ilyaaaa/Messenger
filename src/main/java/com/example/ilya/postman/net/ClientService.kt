@@ -6,6 +6,7 @@ import android.os.AsyncTask
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
+import com.example.ilya.postman.ChatUsersAddActivity
 import com.example.ilya.postman.LoginActivity
 import com.example.ilya.postman.MainActivity
 import com.example.ilya.postman.R
@@ -87,7 +88,6 @@ class ClientService: Service(){
                         restart()
                         break
                     }
-                    Log.d(getString(R.string.net_log_tag), request)
 
                     val jsonObject = JSONObject(request)
 
@@ -98,7 +98,9 @@ class ClientService: Service(){
                                             .putExtra("messageId", 0)
                                             .putExtra("emailIsValid", jsonObject["emailIsValid"] as Boolean)
                                             .putExtra("passIsValid", jsonObject["passIsValid"] as Boolean)
+                                            .putExtra("login", jsonObject["login"] as String)
                                             .putExtra("name", jsonObject["name"] as String)
+                                            .putExtra("name2", jsonObject["name2"] as String)
                                             .putExtra("userId", jsonObject["userId"] as Int)
                             )
                         }
@@ -107,7 +109,8 @@ class ClientService: Service(){
                             sendBroadcast(
                                     Intent(LoginActivity.RECEIVER_ACTION)
                                             .putExtra("messageId", 1)
-                                            .putExtra("success", jsonObject["success"] as Boolean)
+                                            .putExtra("emailIsValid", jsonObject["emailIsValid"] as Boolean)
+                                            .putExtra("loginIsValid", jsonObject["loginIsValid"] as Boolean)
                             )
                         }
 
@@ -120,6 +123,29 @@ class ClientService: Service(){
                                     Intent(MainActivity.RECEIVER_ACTION)
                                             .putExtra("messageId", 0)
                                             .putExtra("success", success)
+                            )
+                        }
+
+                        4 -> {
+                            sendBroadcast(
+                                    Intent(ChatUsersAddActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 4)
+                                            .putExtra("data", jsonObject["data"] as String)
+                            )
+                        }
+
+                        5 -> {
+                            sendBroadcast(
+                                    Intent(ChatUsersAddActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 5)
+                                            .putExtra("data", jsonObject["data"] as String)
+                            )
+                        }
+
+                        6 -> {
+                            sendBroadcast(
+                                    Intent(MainActivity.RECEIVER_ACTION)
+                                            .putExtra("success", jsonObject["success"] as Boolean)
                             )
                         }
                     }
@@ -149,6 +175,7 @@ class ClientService: Service(){
     companion object {
         var isRun = false
         var address = "192.168.0.88"
+//        var address = "192.168.43.80"
         var port = 4000
     }
 }

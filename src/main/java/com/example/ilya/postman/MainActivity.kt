@@ -7,14 +7,15 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.support.design.widget.NavigationView
+import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import com.example.ilya.postman.data.User
+import com.example.ilya.postman.fragments.ChatAddFragment
 import com.example.ilya.postman.fragments.MainFragment
 import com.makeramen.roundedimageview.RoundedImageView
 import org.json.JSONObject
@@ -25,11 +26,12 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
     private lateinit var toolbar: Toolbar
     private lateinit var navView: NavigationView
     private lateinit var navImageView: RoundedImageView
+    private lateinit var navLoginField: TextView
     private lateinit var navNameField: TextView
-    private lateinit var navEmailField: TextView
     private lateinit var navStatusField: TextView
 
     private val mainFragment = MainFragment()
+    private val chatAddFragment = ChatAddFragment()
 
     private lateinit var mainReceiver:MainReceiver
 
@@ -43,8 +45,8 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
         navView = findViewById(R.id.nav_view)
         val navHeader = navView.getHeaderView(0)
         navImageView = navHeader.findViewById(R.id.nav_avatar)
+        navLoginField = navHeader.findViewById(R.id.nav_login_field)
         navNameField = navHeader.findViewById(R.id.nav_name_field)
-        navEmailField = navHeader.findViewById(R.id.nav_email_field)
         navStatusField = navHeader.findViewById(R.id.nav_status_field)
 
         navigationDrawerLayout = findViewById(R.id.main_drawer)
@@ -55,10 +57,6 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setHomeButtonEnabled(true)
-
-        supportFragmentManager.beginTransaction()
-                .add(R.id.container_layout, mainFragment)
-                .commit()
 
         mainReceiver = MainReceiver()
         registerReceiver(mainReceiver, IntentFilter(RECEIVER_ACTION))
@@ -88,7 +86,14 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
     }
 
     private fun initContent(){
-        //TODO: Init all content
+        supportFragmentManager.beginTransaction()
+                .add(R.id.container_layout, mainFragment)
+                .commit()
+
+        navLoginField.text = User.getLogin(applicationContext)
+        navNameField.text = "${User.getName(applicationContext)} ${User.getName2(applicationContext)}"
+
+
     }
 
     override fun onClick(p0: View?) {
@@ -101,17 +106,26 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        selectItem(item.itemId)
+
+        return true
+    }
+
+    private fun selectItem(id: Int){
         val fragmentTransaction = supportFragmentManager.beginTransaction()
 
-        when (item.itemId) {
-            R.id.test_item -> {
-                navNameField.text = User.getName(applicationContext)
-                navEmailField.text = User.getEmail(applicationContext)
+        when (id) {
+            R.id.new_chat_item -> {
+                fragmentTransaction.replace(R.id.container_layout, chatAddFragment)
+            }
+
+            R.id.chats_item -> {
+                fragmentTransaction.replace(R.id.container_layout, mainFragment)
             }
         }
 
+        navigationDrawerLayout.closeDrawer(GravityCompat.START)
         fragmentTransaction.commit()
-        return true
     }
 
     override fun onDestroy() {
@@ -138,6 +152,11 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
                 0 -> {
                     if (!p1.getBooleanExtra("success", false)) startLoginActivity()
                     else initContent()
+                }
+
+                6 -> {
+                    if (p1.getBooleanExtra("success", false))
+                        selectItem(R.id.chats_item)
                 }
             }
         }
