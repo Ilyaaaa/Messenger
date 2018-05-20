@@ -30,7 +30,6 @@ class ChatUsersAddActivity : CustomAppCompactActivity(), View.OnClickListener {
     private lateinit var searchField: EditText
     private lateinit var foundedUsers: ItemAdapter
     private lateinit var addedUsers: ItemAdapter
-
     private lateinit var receiver: ChatUsersAddReceiver
 
     private var query = String()
@@ -67,7 +66,7 @@ class ChatUsersAddActivity : CustomAppCompactActivity(), View.OnClickListener {
         findViewById<Button>(R.id.chat_users_add_button).setOnClickListener(this)
 
         receiver = ChatUsersAddReceiver()
-        registerReceiver(receiver, IntentFilter(RECEIVER_ACTION))
+        registerReceiver(receiver, IntentFilter(ChatActivity.RECEIVER_ACTION))
     }
 
     override fun onClientServiceConnected() {
@@ -89,11 +88,17 @@ class ChatUsersAddActivity : CustomAppCompactActivity(), View.OnClickListener {
                 request.put("id", 4)
                 request.put("query", query)
 
-                clientService!!.sendMessage(request.toString())
+                getClientService()!!.sendMessage(request.toString())
             }
 
             override fun afterTextChanged(p0: Editable?) {}
         })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        unregisterReceiver(receiver)
     }
 
     private fun requestUsersInfo(usersId: ArrayList<Int>) {
@@ -101,12 +106,7 @@ class ChatUsersAddActivity : CustomAppCompactActivity(), View.OnClickListener {
         request.put("id", 5)
         request.put("usersId", JSONArray(usersId))
 
-        clientService!!.sendMessage(request.toString())
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(receiver)
+        getClientService()!!.sendMessage(request.toString())
     }
 
     override fun onClick(p0: View?) {
@@ -130,7 +130,9 @@ class ChatUsersAddActivity : CustomAppCompactActivity(), View.OnClickListener {
 
     private inner class ChatUsersAddReceiver: BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            when (p1!!.getIntExtra("messageId", -1)) {
+            if (p1 == null) return
+
+            when (p1.getIntExtra("messageId", -1)) {
                 4 -> {
                     setFoundedUsers(jsonArrayToArrayList(JSONArray(p1.getStringExtra("data"))))
                 }

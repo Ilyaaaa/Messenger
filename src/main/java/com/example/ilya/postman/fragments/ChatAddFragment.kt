@@ -70,7 +70,7 @@ class ChatAddFragment : Fragment(), View.OnClickListener {
                 request.put("ownerId", User.getId(activity))
                 request.put("users", JSONArray(addedUsersId))
 
-                (activity as CustomAppCompactActivity).clientService!!.sendMessage(request.toString())
+                (activity as CustomAppCompactActivity).getClientService()!!.sendMessage(request.toString())
             }
         }
     }

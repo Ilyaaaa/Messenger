@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ChatActivity">
+
+    <ListView
+        android:id="@+id/message_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/message_input_layout"
+        android:stackFromBottom="true"
+        android:transcriptMode="normal"/>
+
+    <RelativeLayout
+        android:id="@+id/message_input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <EditText
+            android:id="@+id/msg_text_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/msg_send_button"
+            android:hint="@string/msg_text"
+            android:inputType="textMultiLine"
+            android:maxLength="1000"
+            android:minLines="1"
+            android:maxLines="8"
+            android:gravity="top"
+            android:singleLine="false" />
+
+        <Button
+            android:id="@+id/msg_send_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignBottom="@id/msg_text_field"
+            android:enabled="false"/>
+    </RelativeLayout>
+</RelativeLayout>

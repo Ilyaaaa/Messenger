@@ -42,7 +42,8 @@
                 android:imeOptions="actionNext"
                 android:inputType="textMultiLine"
                 android:maxLength="1000"
-                android:lines="5"
+                android:minLines="5"
+                android:maxLines="18"
                 android:gravity="top"
                 android:singleLine="false" />
 

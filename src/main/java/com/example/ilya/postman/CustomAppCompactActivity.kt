@@ -1,9 +1,6 @@
 package com.example.ilya.postman
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v7.app.AppCompatActivity
@@ -11,7 +8,7 @@ import com.example.ilya.postman.net.ClientService
 
 abstract class CustomAppCompactActivity: AppCompatActivity() {
     private lateinit var clientServiceIntent: Intent
-    var clientService: ClientService? = null
+    private var clientService: ClientService? = null
     private lateinit var clientServiceConnection: ServiceConnection
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +36,12 @@ abstract class CustomAppCompactActivity: AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+
         unbindService(clientServiceConnection)
+    }
+
+    fun getClientService(): ClientService? {
+        return clientService
     }
 
     abstract fun onClientServiceConnected()

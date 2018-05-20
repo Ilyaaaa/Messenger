@@ -28,7 +28,7 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
     private lateinit var passwordTextView: EditText
     private lateinit var password2TextView: EditText
 
-    private lateinit var logInReceiver: LogInReceiver
+    private lateinit var receiver: LogInReceiver
 
     private var email: String? = null
     private var pass: String? = null
@@ -60,13 +60,19 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
         passwordTextView.setOnEditorActionListener(this)
         password2TextView.setOnEditorActionListener(this)
 
-        logInReceiver = LogInReceiver()
-        registerReceiver(logInReceiver, IntentFilter(RECEIVER_ACTION))
+        receiver = LogInReceiver()
+        registerReceiver(receiver, IntentFilter(ChatActivity.RECEIVER_ACTION))
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        unregisterReceiver(receiver)
     }
 
     override fun onClick(p0: View?) {
         if (p0 == null) return
-        if(clientService == null) return
+        if(getClientService() == null) return
 
         when (p0.id){
             goButton.id -> {
@@ -140,17 +146,13 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
         return true
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(logInReceiver)
-    }
 
     override fun onClientServiceConnected() {
 
     }
 
     private fun authorize(email: String, pass: String) {
-        clientService!!.sendMessage(
+        getClientService()!!.sendMessage(
                 JSONObject()
                         .put("id", 0)
                         .put("email", email)
@@ -159,7 +161,7 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
     }
 
     private fun register(login: String, name: String, name2: String, email: String, pass: String) {
-        clientService!!.sendMessage(
+        getClientService()!!.sendMessage(
                 JSONObject()
                         .put("id", 2)
                         .put("login", login)
@@ -241,10 +243,12 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
 
     private inner class LogInReceiver: BroadcastReceiver(){
         override fun onReceive(p0: Context?, p1: Intent?) {
+            if (p1 == null) return
+
             val context = applicationContext
             progressBar.progress += 4
 
-            when (p1!!.getIntExtra("messageId", -1)){
+            when (p1.getIntExtra("messageId", -1)){
                 0 -> {
                     val emailIsValid = p1.getBooleanExtra("emailIsValid", false)
                     val passIsValid = p1.getBooleanExtra("passIsValid", false)

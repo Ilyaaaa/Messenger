@@ -1,16 +1,18 @@
 package com.example.ilya.postman.net
 
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Binder
 import android.os.IBinder
+import android.support.v4.app.NotificationCompat
 import android.util.Log
-import com.example.ilya.postman.ChatUsersAddActivity
-import com.example.ilya.postman.LoginActivity
-import com.example.ilya.postman.MainActivity
-import com.example.ilya.postman.R
+import com.example.ilya.postman.*
 import com.example.ilya.postman.data.User
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -145,7 +147,62 @@ class ClientService: Service(){
                         6 -> {
                             sendBroadcast(
                                     Intent(MainActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 6)
                                             .putExtra("success", jsonObject["success"] as Boolean)
+                            )
+                        }
+
+                        7 -> {
+                            sendBroadcast(
+                                    Intent(MainActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 7)
+                                            .putExtra("chats", (jsonObject["chats"] as JSONArray).toString())
+                            )
+                        }
+
+                        8 -> {
+                            val chatId = jsonObject["chatId"].toString().toInt()
+                            val text = jsonObject["text"].toString()
+                            val sendTime = jsonObject["sendTime"].toString().toLong()
+                            if (ChatActivity.currentChatId == chatId)
+                                sendBroadcast(
+                                        Intent(ChatActivity.RECEIVER_ACTION)
+                                                .putExtra("messageId", 8)
+                                                .putExtra("msgId", jsonObject["msgId"].toString().toInt())
+                                                .putExtra("text", text)
+                                                .putExtra("senderId", jsonObject["senderId"].toString().toInt())
+                                                .putExtra("chatId", chatId)
+                                                .putExtra("sendTime", sendTime)
+                                )
+                            else {
+                                val intent = Intent(this@ClientService, ChatActivity::class.java)
+                                        .putExtra("chatId", chatId.toLong())
+
+                                val pIntent = PendingIntent.getActivity(
+                                        this@ClientService,
+                                        0,
+                                        intent,
+                                        PendingIntent.FLAG_UPDATE_CURRENT)
+
+                                val notification = NotificationCompat.Builder(this@ClientService, "")
+                                        .setSmallIcon(R.drawable.ic_launcher_foreground)
+                                        .setContentTitle("title")
+                                        .setContentText(text)
+                                        .setContentIntent(pIntent)
+                                        .setAutoCancel(true)
+                                        .setWhen(sendTime)
+                                        .build()
+
+                                (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                                        .notify(chatId, notification)
+                            }
+                        }
+
+                        9 -> {
+                            sendBroadcast(
+                                    Intent(ChatActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 9)
+                                            .putExtra("messages", (jsonObject["messages"] as JSONArray).toString())
                             )
                         }
                     }

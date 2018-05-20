@@ -17,7 +17,12 @@ import android.widget.TextView
 import com.example.ilya.postman.data.User
 import com.example.ilya.postman.fragments.ChatAddFragment
 import com.example.ilya.postman.fragments.MainFragment
+import com.example.ilya.postman.listsData.ChatItemAdapter
+import com.example.ilya.postman.listsData.ChatItemData
 import com.makeramen.roundedimageview.RoundedImageView
+import com.minibugdev.drawablebadge.BadgePosition
+import com.minibugdev.drawablebadge.DrawableBadge
+import org.json.JSONArray
 import org.json.JSONObject
 
 class MainActivity : CustomAppCompactActivity(), View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
@@ -30,10 +35,12 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
     private lateinit var navNameField: TextView
     private lateinit var navStatusField: TextView
 
-    private val mainFragment = MainFragment()
-    private val chatAddFragment = ChatAddFragment()
+    private lateinit var receiver: MainReceiver
 
-    private lateinit var mainReceiver:MainReceiver
+    private val mainFragment = MainFragment()
+    private lateinit var mainFragmentAdapter: ChatItemAdapter
+
+    private val chatAddFragment = ChatAddFragment()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,8 +65,17 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setHomeButtonEnabled(true)
 
-        mainReceiver = MainReceiver()
-        registerReceiver(mainReceiver, IntentFilter(RECEIVER_ACTION))
+        mainFragmentAdapter = ChatItemAdapter(this, ArrayList(), R.layout.chats_list_item)
+        mainFragment.listAdapter = mainFragmentAdapter
+
+        receiver = MainReceiver()
+        registerReceiver(receiver, IntentFilter(RECEIVER_ACTION))
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        unregisterReceiver(receiver)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -93,12 +109,15 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
         navLoginField.text = User.getLogin(applicationContext)
         navNameField.text = "${User.getName(applicationContext)} ${User.getName2(applicationContext)}"
 
+        val request = JSONObject()
+        request.put("id", 7)
 
+        getClientService()!!.sendMessage(request.toString())
     }
 
     override fun onClick(p0: View?) {
         if (p0 == null) return
-        if(clientService == null) return
+        if(getClientService() == null) return
 
         when (p0.id) {
 
@@ -128,17 +147,13 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
         fragmentTransaction.commit()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(mainReceiver)
-    }
 
     private fun startLoginActivity(){
         startActivityForResult(Intent(this, LoginActivity::class.java), LOGIN_START_FOR_RESULT_ID)
     }
 
     private fun authCheck() {
-        clientService!!.sendMessage(
+        getClientService()!!.sendMessage(
                 JSONObject()
                         .put("id", 3)
                         .put("email", User.getEmail(applicationContext))
@@ -146,9 +161,11 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
         )
     }
 
-    private inner class MainReceiver: BroadcastReceiver(){
+    private inner class MainReceiver: BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            when (p1!!.getIntExtra("messageId", -1)){
+            if (p1 == null) return
+
+            when (p1.getIntExtra("messageId", -1)){
                 0 -> {
                     if (!p1.getBooleanExtra("success", false)) startLoginActivity()
                     else initContent()
@@ -157,6 +174,41 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
                 6 -> {
                     if (p1.getBooleanExtra("success", false))
                         selectItem(R.id.chats_item)
+                }
+
+                7 -> {
+                    val chats = JSONArray(p1.getStringExtra("chats"))
+
+                    val chatsData = ArrayList<ChatItemData>()
+                    for (i in 0 until chats.length()) {
+                        val drawable = DrawableBadge.Builder(this@MainActivity)
+                                .drawableResId(R.drawable.default_chat_avatar)
+                                .badgeColor(R.color.colorUnreadMsgBadge)
+                                .badgePosition(BadgePosition.BOTTOM_RIGHT)
+                                .showBorder(false)
+                                .maximumCounter(99)
+                                .build()
+                                .get(1)
+
+                        val chat = chats[i] as JSONObject
+
+                        val usersId = JSONArray(chat["users"] as String)
+                        val chatUsers = ArrayList<Int>()
+                        for (j in 0 until usersId.length())
+                            chatUsers.add(usersId[j].toString().toInt())
+
+
+                        chatsData.add(ChatItemData(
+                                chat["id"].toString().toLong(),
+                                drawable,
+                                chat["name"].toString(),
+                                "Last message text...",
+                                chat["ownerId"].toString().toInt(),
+                                chatUsers
+                        ))
+                    }
+
+                    mainFragmentAdapter.addAll(chatsData)
                 }
             }
         }

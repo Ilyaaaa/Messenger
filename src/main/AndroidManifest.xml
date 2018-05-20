@@ -24,7 +24,13 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.Classic"/>
+            android:theme="@style/AppTheme.Classic" />
+        <activity
+            android:name=".ChatUsersAddActivity"
+            android:theme="@style/AppTheme.Classic" />
+        <activity
+            android:name=".ChatActivity"
+            android:theme="@style/AppTheme.Classic" />
 
         <service android:name=".net.ClientService" />
 
@@ -39,7 +45,8 @@
         </receiver>
 
         <activity
-            android:name=".ChatUsersAddActivity"
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
             android:theme="@style/AppTheme.Classic"/>
     </application>
 
