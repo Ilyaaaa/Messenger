@@ -205,6 +205,42 @@ class ClientService: Service(){
                                             .putExtra("messages", (jsonObject["messages"] as JSONArray).toString())
                             )
                         }
+
+                        10 -> {
+                            sendBroadcast(
+                                    Intent(SettingsActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 10)
+                                            .putExtra("success", jsonObject["success"] as Boolean)
+                                            .putExtra("error", jsonObject["error"] as String)
+                            )
+                        }
+
+                        11 -> {
+                            sendBroadcast(
+                                    Intent(SettingsActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 11)
+                                            .putExtra("success", jsonObject["success"] as Boolean)
+                                            .putExtra("error", jsonObject["error"] as String)
+                            )
+                        }
+
+                        12 -> {
+                            sendBroadcast(
+                                    Intent(SettingsActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 12)
+                                            .putExtra("success", jsonObject["success"] as Boolean)
+                                            .putExtra("error", jsonObject["error"] as String)
+                            )
+                        }
+
+                        13 -> {
+                            sendBroadcast(
+                                    Intent(SettingsActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 13)
+                                            .putExtra("success", jsonObject["success"] as Boolean)
+                                            .putExtra("error", jsonObject["error"] as String)
+                            )
+                        }
                     }
 
                 }catch (ex: SocketException){
@@ -231,8 +267,8 @@ class ClientService: Service(){
 
     companion object {
         var isRun = false
-        var address = "192.168.0.88"
-//        var address = "192.168.43.80"
+//        var address = "192.168.0.88"
+        var address = "192.168.43.80"
         var port = 4000
     }
 }

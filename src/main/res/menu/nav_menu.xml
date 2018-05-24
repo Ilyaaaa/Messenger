@@ -2,14 +2,30 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:id="@+id/nav_menu_control_group"
         android:checkableBehavior="single">
+
         <item android:id="@+id/new_chat_item"
             android:icon="@drawable/ic_create_black"
             android:title="@string/create_chat"/>
     </group>
+
     <group android:id="@+id/nav_menu_navigation_group"
         android:checkableBehavior="single">
+
         <item android:id="@+id/chats_item"
             android:icon="@drawable/ic_chat_black"
             android:title="@string/chats"/>
+
+        <item android:id="@+id/settings_item"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/settings"/>
     </group>
+
+    <group android:id="@+id/nav_menu_action_group"
+        android:checkableBehavior="single">
+
+        <item android:id="@+id/exit_item"
+            android:icon="@drawable/ic_exit_24dp"
+            android:title="@string/exit_acc"/>
+    </group>
+
 </menu>

@@ -61,7 +61,7 @@ class LoginActivity : CustomAppCompactActivity(), View.OnClickListener, TextView
         password2TextView.setOnEditorActionListener(this)
 
         receiver = LogInReceiver()
-        registerReceiver(receiver, IntentFilter(ChatActivity.RECEIVER_ACTION))
+        registerReceiver(receiver, IntentFilter(RECEIVER_ACTION))
     }
 
     override fun onDestroy() {

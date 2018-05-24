@@ -78,4 +78,8 @@ object User {
         val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         return sharedPreferences.getString("pass", null)
     }
+
+    fun removePrefs(context: Context){
+        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE).edit().clear().apply()
+    }
 }

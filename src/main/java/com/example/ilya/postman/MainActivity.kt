@@ -141,6 +141,15 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
             R.id.chats_item -> {
                 fragmentTransaction.replace(R.id.container_layout, mainFragment)
             }
+
+            R.id.settings_item -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+            }
+
+            R.id.exit_item -> {
+                User.removePrefs(this)
+                startLoginActivity()
+            }
         }
 
         navigationDrawerLayout.closeDrawer(GravityCompat.START)
