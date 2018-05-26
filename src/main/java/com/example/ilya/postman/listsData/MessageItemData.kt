@@ -4,6 +4,7 @@ import java.util.*
 
 data class MessageItemData (
         val id: Long,
+        val header: String,
         val text: String,
         val senderId: Int,
         val chatId: Int,

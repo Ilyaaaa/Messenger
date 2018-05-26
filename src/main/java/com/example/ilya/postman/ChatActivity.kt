@@ -83,7 +83,7 @@ class ChatActivity : CustomAppCompactActivity(), View.OnClickListener {
 
                 getClientService()!!.sendMessage(request.toString())
 
-                sendButton.text = null
+                msgTextView.text = null
             }
         }
     }
@@ -96,6 +96,7 @@ class ChatActivity : CustomAppCompactActivity(), View.OnClickListener {
                 8 -> {
                     val message = MessageItemData(
                             p1.getIntExtra("msgId", -1).toLong(),
+                            p1.getStringExtra("senderName"),
                             p1.getStringExtra("text"),
                             p1.getIntExtra("senderId", -1),
                             p1.getIntExtra("chatId", -1),
@@ -112,6 +113,7 @@ class ChatActivity : CustomAppCompactActivity(), View.OnClickListener {
                     for (i in 0 until messages.length()) {
                         val message = MessageItemData(
                                 (messages[i] as JSONObject)["id"].toString().toLong(),
+                                (messages[i] as JSONObject)["senderName"].toString(),
                                 (messages[i] as JSONObject)["text"].toString(),
                                 (messages[i] as JSONObject)["senderId"].toString().toInt(),
                                 (messages[i] as JSONObject)["chatId"].toString().toInt(),

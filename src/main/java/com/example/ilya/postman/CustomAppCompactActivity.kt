@@ -4,12 +4,14 @@ import android.content.*
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v7.app.AppCompatActivity
+import com.example.ilya.postman.data.DataBase
 import com.example.ilya.postman.net.ClientService
 
 abstract class CustomAppCompactActivity: AppCompatActivity() {
     private lateinit var clientServiceIntent: Intent
     private var clientService: ClientService? = null
     private lateinit var clientServiceConnection: ServiceConnection
+    private lateinit var dataBase: DataBase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +29,8 @@ abstract class CustomAppCompactActivity: AppCompatActivity() {
         }
 
         if (!ClientService.isRun) startService(clientServiceIntent)
+
+        dataBase = DataBase(this)
     }
 
     override fun onStart() {
@@ -42,6 +46,10 @@ abstract class CustomAppCompactActivity: AppCompatActivity() {
 
     fun getClientService(): ClientService? {
         return clientService
+    }
+
+    fun getDataBase(): DataBase {
+        return dataBase
     }
 
     abstract fun onClientServiceConnected()

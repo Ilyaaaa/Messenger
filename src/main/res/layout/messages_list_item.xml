@@ -22,10 +22,17 @@
             android:layout_alignParentTop="true" />
 
         <TextView
-            android:id="@+id/msg_item_text"
+            android:id="@+id/msg_item_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/msg_item_img"/>
+
+        <TextView
+            android:id="@+id/msg_item_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/msg_item_img"
+            android:layout_below="@id/msg_item_header"/>
 
         <TextView
             android:id="@+id/msg_item_time"

@@ -66,7 +66,7 @@ class ChatUsersAddActivity : CustomAppCompactActivity(), View.OnClickListener {
         findViewById<Button>(R.id.chat_users_add_button).setOnClickListener(this)
 
         receiver = ChatUsersAddReceiver()
-        registerReceiver(receiver, IntentFilter(ChatActivity.RECEIVER_ACTION))
+        registerReceiver(receiver, IntentFilter(RECEIVER_ACTION))
     }
 
     override fun onClientServiceConnected() {

@@ -5,17 +5,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.makeramen.roundedimageview.RoundedImageView
-        android:id="@+id/chat_item_img"
-        android:src="@drawable/default_chat_avatar"
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scaleType="fitCenter"
-        app:riv_corner_radius="@dimen/avatar_corner_radius"
-        app:riv_border_width="@dimen/avatar_border_width"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        />
+        android:layout_height="wrap_content">
+
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/chat_item_img"
+            android:src="@drawable/default_chat_avatar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="fitCenter"
+            app:riv_corner_radius="@dimen/avatar_corner_radius"
+            app:riv_border_width="@dimen/avatar_border_width"
+            />
+
+        <ImageView
+            android:id="@+id/chat_item_budge"
+            android:layout_width="@dimen/avatar_size"
+            android:layout_height="@dimen/avatar_size" />
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.media.RingtoneManager
 import android.os.AsyncTask
 import android.os.Binder
 import android.os.IBinder
@@ -51,7 +52,7 @@ class ClientService: Service(){
     fun restart(){
         stopSelf()
         val intent = Intent(this, this::class.java)
-        Timer().schedule(60000){ if (!isRun) startService(intent) }
+        Timer().schedule(5000){ if (!isRun) startService(intent) }
     }
 
     fun sendMessage(message: String) {
@@ -162,19 +163,38 @@ class ClientService: Service(){
 
                         8 -> {
                             val chatId = jsonObject["chatId"].toString().toInt()
+                            val msgId = jsonObject["msgId"].toString().toInt()
                             val text = jsonObject["text"].toString()
+                            val senderName = jsonObject["senderName"].toString()
                             val sendTime = jsonObject["sendTime"].toString().toLong()
-                            if (ChatActivity.currentChatId == chatId)
+
+                            if (ChatActivity.currentChatId == chatId) {
                                 sendBroadcast(
                                         Intent(ChatActivity.RECEIVER_ACTION)
                                                 .putExtra("messageId", 8)
-                                                .putExtra("msgId", jsonObject["msgId"].toString().toInt())
+                                                .putExtra("msgId", msgId)
                                                 .putExtra("text", text)
                                                 .putExtra("senderId", jsonObject["senderId"].toString().toInt())
+                                                .putExtra("senderName", senderName)
                                                 .putExtra("chatId", chatId)
                                                 .putExtra("sendTime", sendTime)
                                 )
-                            else {
+
+                                sendMessage(JSONObject()
+                                        .put("id", 14)
+                                        .put("userId", User.getId(this@ClientService))
+                                        .put("msgId", msgId)
+                                        .toString()
+                                )
+                            }else {
+                                if (MainActivity.isCreated)
+                                    sendBroadcast(
+                                            Intent(MainActivity.RECEIVER_ACTION)
+                                                    .putExtra("messageId", 8)
+                                                    .putExtra("chatId", chatId)
+                                                    .putExtra("text", text)
+                                    )
+
                                 val intent = Intent(this@ClientService, ChatActivity::class.java)
                                         .putExtra("chatId", chatId.toLong())
 
@@ -182,15 +202,17 @@ class ClientService: Service(){
                                         this@ClientService,
                                         0,
                                         intent,
-                                        PendingIntent.FLAG_UPDATE_CURRENT)
+                                        PendingIntent.FLAG_UPDATE_CURRENT
+                                )
 
                                 val notification = NotificationCompat.Builder(this@ClientService, "")
                                         .setSmallIcon(R.drawable.ic_launcher_foreground)
-                                        .setContentTitle("title")
+                                        .setContentTitle(senderName)
                                         .setContentText(text)
                                         .setContentIntent(pIntent)
                                         .setAutoCancel(true)
                                         .setWhen(sendTime)
+                                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                         .build()
 
                                 (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
@@ -241,6 +263,14 @@ class ClientService: Service(){
                                             .putExtra("error", jsonObject["error"] as String)
                             )
                         }
+
+                        14 -> {
+                            sendBroadcast(
+                                    Intent(MainActivity.RECEIVER_ACTION)
+                                            .putExtra("messageId", 14)
+                                            .putExtra("chatId", jsonObject["chatId"] as Long)
+                            )
+                        }
                     }
 
                 }catch (ex: SocketException){
@@ -267,8 +297,8 @@ class ClientService: Service(){
 
     companion object {
         var isRun = false
-//        var address = "192.168.0.88"
-        var address = "192.168.43.80"
+        var address = "192.168.0.88"
+//        var address = "192.168.43.79"
         var port = 4000
     }
 }

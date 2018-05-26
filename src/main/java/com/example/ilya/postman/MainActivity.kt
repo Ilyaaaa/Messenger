@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.support.design.widget.NavigationView
+import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
@@ -28,6 +29,7 @@ import org.json.JSONObject
 class MainActivity : CustomAppCompactActivity(), View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
     private lateinit var navigationDrawerLayout: DrawerLayout
     private lateinit var navigationDrawerToggle: ActionBarDrawerToggle
+    private lateinit var navigationDrawerView: NavigationView
     private lateinit var toolbar: Toolbar
     private lateinit var navView: NavigationView
     private lateinit var navImageView: RoundedImageView
@@ -60,7 +62,8 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
         navigationDrawerToggle = ActionBarDrawerToggle(this, navigationDrawerLayout, R.string.drawer_open, R.string.drawer_close)
         navigationDrawerLayout.addDrawerListener(navigationDrawerToggle)
         navigationDrawerToggle.syncState()
-        findViewById<NavigationView>(R.id.nav_view).setNavigationItemSelectedListener(this)
+        navigationDrawerView = findViewById(R.id.nav_view)
+        navigationDrawerView.setNavigationItemSelectedListener(this)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setHomeButtonEnabled(true)
@@ -76,6 +79,7 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
         super.onDestroy()
 
         unregisterReceiver(receiver)
+        isCreated = false
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -103,16 +107,11 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
 
     private fun initContent(){
         supportFragmentManager.beginTransaction()
-                .add(R.id.container_layout, mainFragment)
+                .replace(R.id.container_layout, mainFragment)
                 .commit()
 
         navLoginField.text = User.getLogin(applicationContext)
         navNameField.text = "${User.getName(applicationContext)} ${User.getName2(applicationContext)}"
-
-        val request = JSONObject()
-        request.put("id", 7)
-
-        getClientService()!!.sendMessage(request.toString())
     }
 
     override fun onClick(p0: View?) {
@@ -147,6 +146,8 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
             }
 
             R.id.exit_item -> {
+                navigationDrawerView.setCheckedItem(R.id.chats_item)
+                mainFragmentAdapter.clear()
                 User.removePrefs(this)
                 startLoginActivity()
             }
@@ -191,13 +192,12 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
                     val chatsData = ArrayList<ChatItemData>()
                     for (i in 0 until chats.length()) {
                         val drawable = DrawableBadge.Builder(this@MainActivity)
-                                .drawableResId(R.drawable.default_chat_avatar)
+                                .drawableResId(R.drawable.empty_64dp)
                                 .badgeColor(R.color.colorUnreadMsgBadge)
                                 .badgePosition(BadgePosition.BOTTOM_RIGHT)
                                 .showBorder(false)
                                 .maximumCounter(99)
                                 .build()
-                                .get(1)
 
                         val chat = chats[i] as JSONObject
 
@@ -206,24 +206,62 @@ class MainActivity : CustomAppCompactActivity(), View.OnClickListener, Navigatio
                         for (j in 0 until usersId.length())
                             chatUsers.add(usersId[j].toString().toInt())
 
-
                         chatsData.add(ChatItemData(
                                 chat["id"].toString().toLong(),
+                                ContextCompat.getDrawable(this@MainActivity, R.drawable.default_chat_avatar),
                                 drawable,
+                                chat["unreadMsgCount"].toString().toInt(),
                                 chat["name"].toString(),
-                                "Last message text...",
+                                chat["lastMsgText"].toString(),
                                 chat["ownerId"].toString().toInt(),
                                 chatUsers
                         ))
                     }
 
+                    mainFragmentAdapter.clear()
                     mainFragmentAdapter.addAll(chatsData)
+
+                    isCreated = true
+                }
+
+                8 -> {
+                    val chatId = p1.getIntExtra("chatId", -1)
+                    val text = p1.getStringExtra("text")
+
+                    for (i in 0 until mainFragmentAdapter.count)
+                        if (mainFragmentAdapter.getItem(i).id == chatId.toLong()) {
+                            val newItem = mainFragmentAdapter.getItem(i).copy()
+                            newItem.unreadMsgCount++
+                            newItem.lastMessage = text
+
+                            mainFragmentAdapter.remove(mainFragmentAdapter.getItem(i))
+                            mainFragmentAdapter.add(0, newItem)
+
+                            break
+                        }
+                }
+
+
+                14 -> {
+                    val chatId = p1.getLongExtra("chatId", -1)
+
+                    for (i in 0 until mainFragmentAdapter.count)
+                        if (mainFragmentAdapter.getItem(i).id == chatId) {
+                            val newItem = mainFragmentAdapter.getItem(i).copy()
+                            if (newItem.unreadMsgCount > 0) newItem.unreadMsgCount--
+
+                            mainFragmentAdapter.remove(mainFragmentAdapter.getItem(i))
+                            mainFragmentAdapter.add(i, newItem)
+
+                            break
+                        }
                 }
             }
         }
     }
 
     companion object {
+        var isCreated = false
         private const val LOGIN_START_FOR_RESULT_ID = 1
         const val RECEIVER_ACTION = "com.example.ilya.postman.MainReceiver"
     }
